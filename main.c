@@ -42,6 +42,8 @@ void UpdateKeyboard(Data *d);
 void FreeData(Data d);
 void PrintData(Data d);
 void DrawBorder(Data d);
+void Save(Data d);
+void Trim(Data d);
 
 int main() {
   
@@ -49,8 +51,8 @@ int main() {
   Data data = {0};
 
   // editable values
-  data.map.x = 64;
-  data.map.y = 16;
+  data.map.x = 512;
+  data.map.y = 64;
   data.tilesize = 16;
   data.curtile = 0;
   data.starttile = 0xff;
@@ -108,12 +110,63 @@ int main() {
 
   }
   //PrintData(data);
+  //Save(data);
+  Trim(data);
   FreeData(data);
 }
 
 void FreeData(Data d) {
   free(d.textures.arr);
   free(d.map.arr);
+}
+
+void Save(Data d) {
+  FILE *outfile = fopen("level", "w");
+  fprintf(outfile, "%lu\n%lu\n%lu\n", d.map.x, d.map.y, d.map.len);
+  for (int i = 0; i < d.map.len; i++)
+    fprintf(outfile, "%d\n", d.map.arr[i]);
+  fclose(outfile);
+}
+
+void Trim(Data d) {
+  int found = 0;
+
+  // left col search
+  unsigned long leftcol = 0;
+  for (int col = 0, found = 0; col < d.map.x && !found; col++) {
+    for (int row = 0; row < d.map.y; row++) {
+      unsigned long index = row * d.map.x + col;
+      unsigned char atIndex = d.map.arr[index];
+      if (atIndex != d.starttile) {
+	leftcol = col;
+	found = 1;
+	break;
+      }
+    }
+  }
+
+  printf("leftcol %lu\n", leftcol);
+
+  // right col search
+  unsigned long rightcol = 0;
+  for (int col = d.map.x - 1, found = 0; col >= 0 && !found; col--) {
+    for (int row = 0; row < d.map.y; row++) {
+      unsigned long index = row * d.map.x + col;
+      unsigned char atIndex = d.map.arr[index];
+      if (atIndex != d.starttile) {
+	rightcol = col;
+	found = 1;
+	break;
+      }
+    }
+  }
+
+  printf("rightcol %lu\n", rightcol);
+
+  // top row search
+  
+
+  // bottom row search
 }
 
 void DrawBorder(Data d) {

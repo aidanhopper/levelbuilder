@@ -1,3 +1,5 @@
+// TODO: limit the size of the stack so that it cant crash your computer
+
 #include <stdlib.h>
 #include "stack.h"
 
